@@ -1,0 +1,63 @@
+//SLiM model to simulate human chr1 in admixed population with tree sequence recording
+//uses recombination rates (cM/Mb) from IMPUTE2 1000G Phase 3 genetic map
+//Usage: slim -d s=0.08 -d ratesfile='"./chr1_recombrates.txt"' -d out='"outname"' CV-admixture_chr1-rates.slim
+
+initialize() {
+	//specify size of chr1
+	defineConstant("L", 249904549);
+	initializeTreeSeq();
+	initializeMutationRate(0);
+	//beneficial mutation, hets have some fitness adv, user provides s
+	initializeMutationType("m1", 0.5, "f", s);
+	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElement(g1, 0, L);
+	
+	//read in chr1 recomb rates
+	lines = readFile(ratesfile);
+	ends = NULL;
+	rates = NULL;
+	
+	//parse rates file into vectors for rates and interval ends
+	//this is very slow. I can't figure out a faster way to do this
+	for (line in lines)
+	{
+		components = strsplit(line, "\t");
+		ends = c(ends, asInteger(components[0]));
+		rates = c(rates, asFloat(components[1]));
+	}
+	
+	//Beware: this is going to dump all the rates and ends to stdout
+	initializeRecombinationRate(rates,ends);
+}
+
+//begin simulation
+1 late() {
+	//create populations p1 (WAfrican) and p2 (Euro), N=5000 each
+	sim.addSubpop("p1", 5000);
+	sim.addSubpop("p2", 5000);
+	
+	//remember ancestors for trees file
+	sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
+	
+	//fix beneficial mutation at DARC locus in p1
+	p1.genomes.addNewDrawnMutation(m1, asInteger(159174683));
+	
+	//create admixed population p3, N=10000
+	//p3 ancestry is 70% WAfrican and 30% Euro
+	sim.addSubpop("p3", 10000);
+	p3.setMigrationRates(c(p1, p2), c(0.7, 0.3));
+}
+
+//remove source pops from simulation
+2 late() {
+	p3.setMigrationRates(c(p1, p2), c(0.0, 0.0));
+	p1.setSubpopulationSize(0);
+	p2.setSubpopulationSize(0);
+}
+
+//output trees file at end of gen 20
+20 late() {
+	outname = "" + "./" + out + ".trees";
+	sim.treeSeqOutput(outname);
+	sim.simulationFinished();
+}
