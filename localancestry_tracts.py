@@ -35,13 +35,13 @@ bene_samples = []
 for root in bene_tree.roots:
 	if bene_tree.population(root)==0:
 		for sample in bene_tree.samples(root):
-			if sample >= 20000:
+			if sample >= 8:
 				bene_samples.append(sample)
 
 ##table collection that makes up the full tree sequence
 tablecoll = ts.dump_tables()
 ##mapping ancestors to samples that had the beneficial allele
-bene_ancestors = tablecoll.map_ancestors(bene_samples, range(10000))
+bene_ancestors = tablecoll.map_ancestors(bene_samples, range(4))
 
 ##get local ancestry tract lengths surrounding the beneficial locus
 ##for each sample that had the beneficial trait
@@ -68,7 +68,7 @@ with open(f"{outfile}_tractlengths.txt", 'w') as out:
 		right.sort(axis=0)
 		
 		##get index for interval that includes the beneficial locus
-		bene_indx = int(np.argwhere(np.logical_and(left<=bene_locus, bene_locus<=right)))
+		bene_indx = int(np.argwhere(np.logical_and(left<=bene_locus, bene_locus<=right))[0])
 		
 		##combine start and end coords
 		child_trees = np.stack((left, right), axis=-1)

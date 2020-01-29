@@ -40,7 +40,7 @@ tablecoll=ts.dump_tables()
 #map p1 ancestors to all samples (chromosomes) in admixed population
 #outputs an EdgeTable with
 #left genomic position, right genomic position, ancestor ID, and sample ID
-ancestor_link = tablecoll.map_ancestors(range(20000,40000), range(10000))
+ancestor_link = tablecoll.map_ancestors(range(8,20008), range(4))
 
 #calculate interval over which each individual has ancestry from
 #a specific ancestor
@@ -51,7 +51,7 @@ prop_count=0
 
 #iterate over all individuals
 #each individual has two chromosomes, so step size is 2
-for child in range(20000,40000,2):
+for child in range(8,20008,2):
 	#indices from EdgeTable for each individual (2 per individual)
 	child_indx = np.argwhere(np.logical_or(ancestor_link.child==child, ancestor_link.child==child+1))
 	
