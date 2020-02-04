@@ -34,13 +34,15 @@ ts = pyslim.load(infile).simplify()
 #size of chr1
 chrom_length = 249904549.
 
+samples=ts.num_samples
+
 #table collection that makes up the full tree sequence
 tablecoll=ts.dump_tables()
 
 #map p1 ancestors to all samples (chromosomes) in admixed population
 #outputs an EdgeTable with
 #left genomic position, right genomic position, ancestor ID, and sample ID
-ancestor_link = tablecoll.map_ancestors(range(8,20008), range(4))
+ancestor_link = tablecoll.map_ancestors(range(8,samples), range(4))
 
 #calculate interval over which each individual has ancestry from
 #a specific ancestor
@@ -51,7 +53,7 @@ prop_count=0
 
 #iterate over all individuals
 #each individual has two chromosomes, so step size is 2
-for child in range(8,20008,2):
+for child in range(8,samples,2):
 	#indices from EdgeTable for each individual (2 per individual)
 	child_indx = np.argwhere(np.logical_or(ancestor_link.child==child, ancestor_link.child==child+1))
 	
@@ -67,7 +69,7 @@ for child in range(8,20008,2):
 	if global_ancestry > 0.75:
 		prop_count+=1
 
-prop = prop_count/10000
+prop = prop_count/((samples-8)/2)
 
 #print proportion of individuals with p1 global ancestry > 0.75 to stdout
 ##print(f"{s}\t{seed}\t{prop}")
