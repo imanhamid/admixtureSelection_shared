@@ -34,14 +34,12 @@ def homProp(child_range, root_range, tree):
 	hom_count = 0
 	for child in child_range:
 		hom_count += getHomozygosity(tree, child, root_range)
-	child_end = child_range[-2]+2
-	child_start = child_range[0]
-	hom_prop = hom_count / ((child_end - child_start) / 2)
+	hom_prop = hom_count / (len(child_range))
 	return hom_prop
 
 p1_range = range(0,4)
 p2_range = range(4,8)
-child_range = range(8, samples, 2)
+child_range = np.random.choice(range(8,samples, 2), size=2000, replace=False)
 
 for tree in ts.trees(sample_counts=True):
 	p1_prop = homProp(child_range, p1_range, tree)
@@ -49,7 +47,7 @@ for tree in ts.trees(sample_counts=True):
 	breaks[tree.index] = tree.interval[0]
 	p1_hom[tree.index] = p1_prop
 	p2_hom[tree.index] = p2_prop
-	
+
 breaks[-1] = ts.sequence_length
 p1_hom[-1] = p1_hom[-2]
 p2_hom[-1] = p2_hom[-2]
